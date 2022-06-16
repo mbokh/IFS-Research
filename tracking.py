@@ -40,22 +40,27 @@ def distance(v):
 
 def calculateCost(previousPrediction, currentBBox, previousBBox, occlusion):
 	toTarget = (currentBBox[4] - previousPrediction[0, 0], currentBBox[5] - previousPrediction[1, 0])
-
 	dist = distance(toTarget)
+	distanceCost = 100 if dist >= 30 else 0.1 * dist * dist
+
+	
 	size = (abs(previousPrediction[4, 0]) - abs(currentBBox[2]))**2 + (abs(previousPrediction[5, 0]) - abs(currentBBox[3]))**2
+	sizeCost = 100 if size >= 25 else 0.07 * size * size
+
 
 	velocityVector = (previousPrediction[2][0], previousPrediction[3][0])
 	displacement = (currentBBox[4] - previousBBox[4], currentBBox[5] - previousBBox[5])
-	occlusionScore = (occlusion**3) + 20
+
+	occlusionScore = (occlusion**3) + 10
 
 	if distance(displacement) == 0 or distance(velocityVector) < 0.25:
-		return (1*dist) + (2.5 * size) + occlusionScore # Can't use angle metric here
+		return (1*distanceCost) + (1 * sizeCost) + occlusionScore # Can't use angle metric here
 
 	cosine = ((velocityVector[0] * displacement[0]) + (velocityVector[1] * displacement[1])) / (distance(displacement) * distance(velocityVector))
 	angleScore = 10 * math.exp(-2 * cosine)
 	#if dist > 3 * distance(velocityVector):
 	#	return 10000
-	return (1*dist) + (2.5 * size)  + occlusionScore
+	return (1*distanceCost) + (1 * sizeCost)  + occlusionScore
 
 
 def appendZeros(costMatrix):
@@ -67,35 +72,31 @@ def appendZeros(costMatrix):
 		newCostMatrix[i, oldSize] = 0
 	return newCostMatrix
 
-def iterativelyFindBetterSolutions(rows, cols, costMatrix, oldCost):
-	print(costMatrix)
-	largeCost = False
-	for i in range(len(rows)):
-		if costMatrix[rows[i], cols[i]] > 100:
-			largeCost = True
-			break
-	if not largeCost:
-		return rows, cols
+def hasLargeCost(costMatrix, r, c):
+	for i in range(len(r)):
+		if costMatrix[r[i], c[i]] > 100:
+			return True
+	return False
 
-	newCostMatrix = appendZeros(costMatrix)
+def iterativelyFindBetterSolutions(rows, cols, costMatrix, oldCost):
+	if not hasLargeCost(costMatrix, rows, cols):
+		return rows, cols, costMatrix
+
 	while True:
+		newCostMatrix = appendZeros(costMatrix)
 		newRows, newCols = linear_sum_assignment(newCostMatrix)
 		newCost = newCostMatrix[newRows, newCols].sum()
 
 		if newCost >= oldCost:
-			return rows, cols
-		largeCost = False
-		for i in range(len(newRows)):
-			if newCostMatrix[newRows[i], newCols[i]] > 100:
-				largeCost = True
-				break
-		if not largeCost:
-			return newRows, newCols
+			return rows, cols, costMatrix
 
+		if not hasLargeCost(newCostMatrix, newRows, newCols):
+			return newRows, newCols, newCostMatrix
 
 		oldCost = newCost
 		rows = newRows
 		cols = newCols
+		costMatrix = newCostMatrix
 
 		length = newCostMatrix.shape[0]
 		for i in range(length):
@@ -150,7 +151,8 @@ class MultiObjectTracker:
 		rows, cols = linear_sum_assignment(costMatrix)
 
 		if size > 0:
-			rows, cols = iterativelyFindBetterSolutions(rows, cols, costMatrix, costMatrix[rows, cols].sum())
+			rows, cols, costMatrix = iterativelyFindBetterSolutions(rows, cols, costMatrix, costMatrix[rows, cols].sum())
+		#print(costMatrix)
 
 		toBeDeleted = []
 		for i in range(len(rows)):

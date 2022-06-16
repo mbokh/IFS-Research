@@ -35,35 +35,36 @@ colors = colorId.ColorId()
 for i in range(250):
 	ret, frame = video.read()
 
-#outVideo = cv2.VideoWriter("sampleTracking.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 20, (896, 280))
+outVideo = cv2.VideoWriter("sampleTracking.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 20, (896, 548))
 black = np.zeros((100, 896, 3), np.uint8)
+frame = np.zeros((548, 896, 3), np.uint8)
 while True:
 	ret, f = video.read()
-	frame = np.zeros((548, 896, 3), np.uint8)
-	frame[:100, :] = black
-	frame[100:, :] = f
-
 	if not ret:
 		print("Bad read")
 		break
 
+	frame[:100, :] = black
+	frame[100:, :] = f
+
 	#cv2.imshow('source', frame)
 
 
-	detectedFrame = frame.copy()
-	showDetectedFrame(detectedFrame, tracking.detectObjects(frame))
-	cv2.imshow('detected', detectedFrame)
+	#detectedFrame = frame.copy()
+	#showDetectedFrame(detectedFrame, tracking.detectObjects(frame))
+	#cv2.imshow('detected', detectedFrame)
 
 	tracker.processImage(frame)
 	f = decorateFrame(frame, tracker, frameNum)
-	#outVideo.write(f[:280, :])
-	cv2.imshow('frame', f)
+	outVideo.write(f)
+	#cv2.imshow('frame', f)
 
-	if cv2.waitKey(0) & 0xFF == ord('q'):
-		break
-	#print(frameNum)
+	#if cv2.waitKey(0) & 0xFF == ord('q'):
+	#	break
+	print(frameNum)
 	frameNum += 1
 
 # When everything done, release the capture
 video.release()
+outVideo.release()
 cv2.destroyAllWindows()

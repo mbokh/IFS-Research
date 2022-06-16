@@ -58,4 +58,6 @@ class KalmanFilter:
 		self.kalman.correct(m)
 
 	def updateFromPrediction(self):
-		self.kalman.correct(np.matmul(self.kalman.measurementMatrix, self.kalman.predict()))
+		data = np.matmul(self.kalman.measurementMatrix, self.kalman.predict())
+		self.kalman.correct(data)
+		return int(data[0, 0] - (data[2, 0] / 2)), int(data[1, 0] - (data[3, 0] / 2)), int(data[2, 0]), int(data[3, 0]), data[0, 0], data[1, 0]

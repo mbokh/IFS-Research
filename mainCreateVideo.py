@@ -6,13 +6,13 @@ import tracking
 import frameDecoration
 
 def coordTransform(coords):
-	return (coords[0] - 496) * 3, (coords[1] + 50) * 3, coords[2] * 3, coords[3] * 3, (coords[4] - 496) * 3, (coords[5] + 50) * 3
+	return (coords[0] - 496) * 4, (coords[1] + 10) * 4, coords[2] * 4, coords[3] * 4, (coords[4] - 496) * 4, (coords[5] + 10) * 4
 
 video = videoSource.VideoSource("MF_AlZr.avi", skip=250)
 tracker = tracking.MultiObjectTracker()
 decorator = frameDecoration.FrameDecorator()
 
-outVideo = cv2.VideoWriter("trackingVidWithoutOcclusion.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 20, (1200, 900))
+outVideo = cv2.VideoWriter("trackingVidWithoutOcclusion16x9.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 20, (1600, 900))
 
 while True:
 	frame, frameNum = video.getFrame()
@@ -22,9 +22,9 @@ while True:
 
 	tracker.processImage(frame)
 
-	newFrame = np.zeros((300, 400, 3), np.uint8)
-	newFrame[50:, :] = frame[:250, -400:]
-	resized = cv2.resize(newFrame, (1200, 900))
+	newFrame = np.zeros((225, 400, 3), np.uint8)
+	newFrame[10:, :] = frame[:215, -400:]
+	resized = cv2.resize(newFrame, (1600, 900))
 
 	outVideo.write(decorator.decorateFrame(resized, tracker, frameNum, coordTransform, showOccluded=False, showPath=True))
 

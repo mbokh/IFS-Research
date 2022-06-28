@@ -26,7 +26,7 @@ while True:
 	newFrame[10:, :] = frame[:215, -400:]
 	resized = cv2.resize(newFrame, (1600, 900))
 
-	outVideo.write(decorator.decorateFrame(resized, tracker, frameNum, coordTransform, showOccluded=False, showPath=True))
+	outVideo.write(decorator.decorateFrame(resized, tracker, frameNum, coordTransform, showDebugInfo=True, showOccluded=False, showPath=True))
 
 	if frameNum % 20 == 0:
 		print(frameNum)

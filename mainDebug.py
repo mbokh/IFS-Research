@@ -4,6 +4,7 @@ import tracking
 import videoSource
 import frameDecoration
 import dataLogger
+import spectraExtract
 
 def identityTransform(coords):
 	return coords
@@ -20,7 +21,8 @@ while True:
 		break
 
 	tracker.processImage(frame)
-	cv2.imshow('frame', decorator.decorateFrame(frame, tracker, frameNum, identityTransform, showOccluded=True, showPath=False))
+	spectra = spectraExtract.extractRawSpectra(frame, tracker.getTrackingData())
+	cv2.imshow('frame', decorator.decorateFrame(frame, tracker, frameNum, identityTransform, showDebugInfo=True, showOccluded=True, showPath=False))
 
 	logger.logData(tracker, frameNum)
 

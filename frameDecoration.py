@@ -26,7 +26,7 @@ class FrameDecorator:
 		else:
 			self.traces[pId] = [(x, y, occluded)]
 
-	def decorateFrame(self, f, track, frameNum, coordTransform, showOccluded=True, showPath=True):
+	def decorateFrame(self, f, track, frameNum, coordTransform, showDebugInfo=True, showOccluded=True, showPath=True):
 		boundingData = track.getTrackingData()
 		for particleId, coords, occCount in boundingData:
 			x, y, w, h, cX, cY = coordTransform(coords)
@@ -43,9 +43,10 @@ class FrameDecorator:
 			if showPath:
 				self.addToPath(particleId, int(cX), int(cY), occCount > 0)
 
-		cv2.putText(f, "Frame Num: " + str(frameNum), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA, False)
-		cv2.putText(f, "Last ID used: " + str(track.getPreviouslyUsedId()), (20, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA, False)
-		cv2.putText(f, "Particles: " + str(len(boundingData)), (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA, False)
+		if showDebugInfo:
+			cv2.putText(f, "Frame Num: " + str(frameNum), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA, False)
+			cv2.putText(f, "Last ID used: " + str(track.getPreviouslyUsedId()), (20, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA, False)
+			cv2.putText(f, "Particles: " + str(len(boundingData)), (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA, False)
 
 		if showPath:
 			for pId in self.traces:

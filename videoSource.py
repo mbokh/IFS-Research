@@ -1,5 +1,21 @@
 import cv2
 
+def getWidth():
+	return 896
+
+def getHeight():
+	return 448
+
+def getSpectraPartition():
+	return 696
+
+# -------------------------Width
+# |                  |
+# |                  |
+# |     spectra      |  real
+# |      lines       |  image
+# |                  |
+# H                 Part.
 class VideoSource:
 	def __init__(self, filename, skip=0):
 		self.video = cv2.VideoCapture(filename)

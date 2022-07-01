@@ -3,6 +3,7 @@ from scipy.optimize import linear_sum_assignment
 import cv2
 import kalman
 import numpy as np
+import videoSource
 
 LARGE_WEIGHT = 100000
 
@@ -12,7 +13,7 @@ def detectObjects(img):
 	blured = cv2.GaussianBlur(gray, (11, 11), 0, 0)
 	sharpened = cv2.addWeighted(gray, 5, blured, -4, 0)
 
-	cv2.rectangle(sharpened, (0, 0), (896 - 200, 448), 0, -1) #Block the spectra
+	cv2.rectangle(sharpened, (0, 0), (videoSource.getSpectraPartition(), videoSource.getHeight()), 0, -1) #Block the spectra
 
 	binary = cv2.threshold(sharpened, 40, 255, cv2.THRESH_BINARY)[1]
 

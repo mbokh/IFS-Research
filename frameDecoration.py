@@ -1,24 +1,9 @@
 import cv2
-import math
-import random
-
-def getNewColor():
-	while True:
-		c = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-		if c[2] > 120 and c[0] < 80 and c[1] < 80: #Too close to pure red
-			continue
-		if math.sqrt(c[0]**2 + c[1]**2 + c[2]**2) > 200:
-			return c
+import colorID
 
 class FrameDecorator:
 	def __init__(self):
-		self.colors = dict()
 		self.traces = dict()
-
-	def getColorOfId(self, boxId):
-		if not boxId in self.colors.keys():
-			self.colors[boxId] = getNewColor()
-		return self.colors[boxId]
 
 	def addToPath(self, pId, x, y, occluded):
 		if pId in self.traces:
@@ -37,7 +22,7 @@ class FrameDecorator:
 			else:
 				if occCount > 0:
 					continue
-			cv2.rectangle(f, (x, y), (x + w, y + h), self.getColorOfId(particleId) if occCount == 0 else (0, 0, 255), 1)
+			cv2.rectangle(f, (x, y), (x + w, y + h), colorID.getColorOfId(particleId) if occCount == 0 else (0, 0, 255), 1)
 			cv2.putText(f, str(particleId), (x - 15, y), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255) if occCount == 0 else (0, 0, 255), 1, cv2.LINE_AA, False)
 
 			if showPath:
@@ -54,9 +39,9 @@ class FrameDecorator:
 				for (x, y, occluded) in path:
 					if not showOccluded:
 						assert(occluded == False)
-					cv2.circle(f, (x, y), 2, (0, 0, 255) if occluded else self.getColorOfId(pId), -1)
+					cv2.circle(f, (x, y), 2, (0, 0, 255) if occluded else colorID.getColorOfId(pId), -1)
 				for i in range(len(path) - 1):
-					cv2.line(f, (path[i][0], path[i][1]), (path[i + 1][0], path[i + 1][1]), self.getColorOfId(pId), 1)
+					cv2.line(f, (path[i][0], path[i][1]), (path[i + 1][0], path[i + 1][1]), colorID.getColorOfId(pId), 1)
 
 			# Delete old paths
 			if len(boundingData) == 0:

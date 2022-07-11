@@ -18,6 +18,8 @@ logger = dataLogger.Logger()
 
 matplotlib.use('TkAgg')
 graph = plt.figure()
+graph.canvas.manager.window.wm_geometry("+%d+%d" % (0, 0))
+
 plt.ion()
 plt.show()
 while True:
@@ -32,12 +34,21 @@ while True:
 	cv2.imshow('Rotated', f)
 
 	plt.clf()
-	for pId, code, s in spectra:
-		plt.plot(s)
-		plt.pause(0.002)
-	plt.draw()
-	#logger.logData(tracker, frameNum)
 
+	for pId, code, s in spectra:
+		print(str(pId) + ": " + str(code))
+		color = "green"
+		if code == 1:
+			color = "blue"
+		if code == 2:
+			color = "red"
+		plt.plot(s, label=("" + str(pId)), color=color)
+
+	#logger.logData(tracker, frameNum)
+	plt.title("Frame Number: " + str(frameNum))
+	plt.draw()
+	graph.canvas.flush_events()
+	plt.pause(0.01)
 
 	if cv2.waitKey(0) & 0xFF == ord('q'):
 		break

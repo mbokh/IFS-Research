@@ -22,13 +22,13 @@ axs[1].plot(combinedX, combinedIntensities, 'g')
 fig.tight_layout()
 plt.show()
 
-'''print("Least Squares:")
+print("Least Squares:")
 t = time.time_ns()
 solution1 = leastSquares.optimize(offsets, combinedIntensities)
 print((time.time_ns() - t) / 1000000000)
 for i in range(len(temps)):
 	print(str(int(solution1[2 * i])) +  ", " + str(np.format_float_positional(solution1[2 * i + 1], precision=3)))
-'''
+
 
 print()
 print()

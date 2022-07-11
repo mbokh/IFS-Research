@@ -3,6 +3,7 @@ import cv2
 import math
 
 import videoSource
+import colorID
 
 spectraLineAngle = 2.2 #Degrees, positive because in image plane, y axis is "down"
 mappingTransform = np.array([[1, 0, -349],
@@ -32,9 +33,9 @@ def addBlackPadding(f):
 	return newFrame
 
 def boundingBoxesOverlap(r1, r2):
-	x1, y1, w1, h1 = r1
-	x2, y2, w2, h2 = r2
-	return x1 < x2 + w2 and x1 + w1 > x2 and y1 < y2 + h2 and y1 + h1 > y2
+	x1, y1, r1, b1 = r1
+	x2, y2, r2, b2 = r2
+	return x1 < r2 and r1 > x2 and y1 < b2 and b1 > y2
 
 def subtractRange(initialSet, operand):
 	processed = []
@@ -66,8 +67,8 @@ def extractRawSpectra(frame, trackingData):
 		x1, y1, w1, h1, cX1, cY1 = box
 		mappedCX, mappedCY = mapParticleToSpectra(cX1, cY1)
 		#Length preserved
-		cv2.rectangle(rotated_image, (mappedCX - extendLeft, mappedCY + int(h1 / 2)), (mappedCX + extendLeft, mappedCY - int(h1 / 2)), 255, 1)
-		bBoxes.append((particleId, (mappedCX - extendLeft, mappedCY - int(h1 / 2), mappedCX + extendRight, mappedCY + int(h1 / 2))))
+		cv2.rectangle(rotated_image, (mappedCX - extendLeft, mappedCY + int(h1 / 2)), (mappedCX + extendLeft, mappedCY - int(h1 / 2)), colorID.getColorOfId(particleId), 1)
+		bBoxes.append((particleId, (mappedCX - extendLeft, mappedCY - int(h1 / 2), mappedCX + extendRight, mappedCY + int(h1 / 2), w1)))
 
 	#Contains index of bBox
 
@@ -86,7 +87,7 @@ def extractRawSpectra(frame, trackingData):
 
 		initialRange = [(bBoxes[i][1][1], bBoxes[i][1][3])]
 		if len(conflicts) == 0: #No conflit case
-			measurements.append((bBoxes[i][0], 0, integrateOverRanges(gray, bBoxes[i][1][0], bBoxes[i][1][2], initialRange)))
+			measurements.append((bBoxes[i][0], 0, averageOverRanges(gray, bBoxes[i][1][0], bBoxes[i][1][2], initialRange, bBoxes[i][1][4])))
 		else:
 			for k in conflicts:
 				initialRange = subtractRange(initialRange, (bBoxes[k][1][1], bBoxes[k][1][3]))
@@ -96,17 +97,17 @@ def extractRawSpectra(frame, trackingData):
 					largeBands.append(segment)
 
 			if len(largeBands) > 0:
-				measurements.append((bBoxes[i][0], 1, integrateOverRanges(gray, bBoxes[i][1][0], bBoxes[i][1][2], largeBands)))
+				measurements.append((bBoxes[i][0], 1, averageOverRanges(gray, bBoxes[i][1][0], bBoxes[i][1][2], largeBands, bBoxes[i][1][4])))
 			else:
-				measurements.append((bBoxes[i][0], 2, integrateOverRanges(gray, minX, maxX, [(bBoxes[i][1][1], bBoxes[i][1][3])])))
+				measurements.append((bBoxes[i][0], 2, averageOverRanges(gray, minX, maxX, [(bBoxes[i][1][1], bBoxes[i][1][3])], bBoxes[i][1][4])))
 
 	return rotated_image, measurements
 
 
-def integrateOverRanges(frame, startX, endX, yRange):
+def averageOverRanges(frame, startX, endX, yRange, particleWidth):
 	vector = np.zeros(endX - startX + 1, np.uint8)
 	height = 0
 	for startY, endY in yRange:
 		vector = vector + frame[startY:endY + 1, startX:endX + 1].sum(axis=0)
 		height += endY - startY + 1
-	return vector / height
+	return vector / (height * particleWidth)

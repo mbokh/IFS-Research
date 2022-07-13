@@ -5,13 +5,12 @@ import utils
 import time
 from matplotlib import pyplot as plt
 
-temps = [2323, 2650, 2400]
-gains = [0.3, 0.73, 0.91]
-offsets = [0, 240, 310]
+temps = [2350, 2750, 2350, 2520]
+offsets = [0, 10, 40, 50]
 
 utils.responseFunction = utils.gaussianResponse
 
-curves = [utils.createCurve(temps[i], gains[i], offsets[i], offsets[-1]) for i in range(len(temps))]
+curves = [utils.createCurve(temps[i], offsets[i], offsets[-1]) for i in range(len(temps))]
 combinedIntensities = sum(curves)
 
 combinedX = np.linspace(0, utils.pixelEnd + offsets[-1] - 1, utils.pixelEnd + offsets[-1])
@@ -27,7 +26,7 @@ t = time.time_ns()
 solution1 = leastSquares.optimize(offsets, combinedIntensities)
 print((time.time_ns() - t) / 1000000000)
 for i in range(len(temps)):
-	print(str(int(solution1[2 * i])) +  ", " + str(np.format_float_positional(solution1[2 * i + 1], precision=3)))
+	print(int(solution1[i]))
 
 
 print()
@@ -37,4 +36,4 @@ t = time.time_ns()
 solution2 = bruteForce.optimize(offsets, combinedIntensities)
 print((time.time_ns() - t) / 1000000000)
 for i in range(len(temps)):
-	print(str(int(solution2[2 * i])) + ", " + str(np.format_float_positional(solution2[2 * i + 1], precision=3)))
+	print(int(solution2[i]))

@@ -44,7 +44,7 @@ while True:
 	for pId, code, s in spectra:
 		if graphNum > 11:
 			break
-		print(str(pId) + ": " + str(code))
+		#print(str(pId) + ": " + str(code))
 		color = "green"
 		if code == 1:
 			color = "blue"
@@ -68,15 +68,13 @@ while True:
 
 	if outVideo is None:
 		s = fig.get_size_inches()*fig.dpi
-		outVideo = cv2.VideoWriter("spectra.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(s[0]), int(s[1])))
+		outVideo = cv2.VideoWriter("spectra1.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(s[0]), int(s[1])))
 	img = np.array(fig.canvas.buffer_rgba())
 	img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
 	outVideo.write(img)
 
 	plt.pause(0.01)
 
-	if cv2.waitKey(0) & 0xFF == ord('q'):
-		break
 
 video.destroy()
 cv2.destroyAllWindows()

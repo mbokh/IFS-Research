@@ -26,7 +26,7 @@ class VideoSource:
 	def getFrame(self):
 		self.frameNum += 1
 		ret, f = self.video.read()
-		if not ret:
+		if not ret or self.frameNum == 2100:
 			return None, self.frameNum
 		return f, self.frameNum
 

@@ -36,7 +36,7 @@ while True:
 	plt.clf()
 
 	for pId, code, s in spectra:
-		print(str(pId) + ": " + str(code))
+		#print(str(pId) + ": " + str(code))
 		color = "green"
 		if code == 1:
 			color = "blue"

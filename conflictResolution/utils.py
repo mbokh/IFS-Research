@@ -7,8 +7,6 @@ pixelX = np.linspace(0, pixelEnd - 1, pixelEnd)
 
 minTemp = 2000.0
 maxTemp = 3000.0
-minGain = 0.0
-maxGain = 1.0
 
 c1 = 1.19 / (10**16)
 c2 = 0.0144
@@ -21,15 +19,15 @@ def pixelToWavelength(pixels):
 def plancksLaw(wavelengths, T):
 	return (c1 / np.power(wavelengths, 5)) / (np.exp(c2 / (wavelengths * T)) - 1)
 
-def createCurve(T, gain, pixelShift, maxOffset):
+def createCurve(T, pixelShift, maxOffset):
 	if (T, pixelShift) in tempLookup.keys():
-		return tempLookup[(T, pixelShift)] * gain
+		return tempLookup[(T, pixelShift)]
 	i = plancksLaw(pixelToWavelength(pixelX), T)
 
 	shiftedI = np.zeros(pixelEnd + maxOffset)
 	shiftedI[pixelShift:pixelEnd + pixelShift] = i * responseFunction(pixelX)
 	tempLookup[(T, pixelShift)] = shiftedI
-	return shiftedI * gain
+	return shiftedI
 
 def identityResponse(i):
 	return i

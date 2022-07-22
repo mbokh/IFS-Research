@@ -1,5 +1,6 @@
 import cv2
 import colorID
+import database
 
 class FrameDecorator:
 	def __init__(self):
@@ -11,8 +12,8 @@ class FrameDecorator:
 		else:
 			self.traces[pId] = [(x, y, occluded)]
 
-	def decorateFrame(self, f, track, frameNum, coordTransform, showDebugInfo=True, showOccluded=True, showPath=True):
-		boundingData = track.getTrackingData()
+	def decorateFrame(self, f, frameNum, coordTransform, showDebugInfo=True, showOccluded=True, showPath=True):
+		boundingData = database.getLastBoundingBoxes()
 		for particleId, coords, occCount in boundingData:
 			x, y, w, h, cX, cY = coordTransform(coords)
 
@@ -30,7 +31,7 @@ class FrameDecorator:
 
 		if showDebugInfo:
 			cv2.putText(f, "Frame Num: " + str(frameNum), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA, False)
-			cv2.putText(f, "Last ID used: " + str(track.getPreviouslyUsedId()), (20, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA, False)
+			cv2.putText(f, "Last ID used: " + str(database.getPreviouslyUsedId()), (20, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA, False)
 			cv2.putText(f, "Particles: " + str(len(boundingData)), (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA, False)
 
 		if showPath:

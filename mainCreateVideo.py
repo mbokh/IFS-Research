@@ -12,7 +12,7 @@ video = videoSource.VideoSource("MF_AlZr.avi", skip=250)
 tracker = tracking.MultiObjectTracker()
 decorator = frameDecoration.FrameDecorator()
 
-outVideo = cv2.VideoWriter("trackingVidWithoutOcclusion16x9.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 20, (1600, 900))
+outVideo = cv2.VideoWriter("trackingTest.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 20, (1600, 900))
 
 while True:
 	frame, frameNum = video.getFrame()
@@ -20,13 +20,13 @@ while True:
 		print("Video Done")
 		break
 
-	tracker.processImage(frame)
+	tracker.processImage(frame, frameNum)
 
 	newFrame = np.zeros((225, 400, 3), np.uint8)
 	newFrame[10:, :] = frame[:215, -400:]
 	resized = cv2.resize(newFrame, (1600, 900))
 
-	outVideo.write(decorator.decorateFrame(resized, tracker, frameNum, coordTransform, showDebugInfo=True, showOccluded=False, showPath=True))
+	outVideo.write(decorator.decorateFrame(resized, frameNum, coordTransform, showDebugInfo=True, showOccluded=True, showPath=True))
 
 	if frameNum % 20 == 0:
 		print(frameNum)

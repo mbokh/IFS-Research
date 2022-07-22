@@ -6,7 +6,7 @@ import time
 from matplotlib import pyplot as plt
 
 temps = [2350, 2750, 2350, 2520]
-offsets = [0, 10, 40, 50]
+offsets = [0, 30, 60, 90]
 
 utils.responseFunction = utils.gaussianResponse
 

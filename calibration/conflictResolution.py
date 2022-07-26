@@ -38,17 +38,20 @@ def resolve(measurement, pixelOffsets):  #pId -> offset
 
 	t = time.time_ns()
 	solution = solveLeastSquares(offsets, lossFunction)
-
+	#print((time.time_ns() - t) / 1000000000)
 	if len(offsets) < 5:
+		#t = time.time_ns()
 		bruteForceSolution = solveBruteForce(offsets, lossFunction)
 		if lossFunction(bruteForceSolution) < lossFunction(solution):
 			solution = bruteForceSolution
 
-	#print((time.time_ns() - t) / 1000000000)
+	print((time.time_ns() - t) / 1000000000)
 
 	resultDict = dict()
-	for i in range(len(offsets)):
-		resultDict[pId[i]] = int(solution[i]), conversion.createCurvePhysicalSpace(solution[i])
+	ideal = sum([conversion.createCurvePixelSpace(solution[i], offsets[i], maxValue) for i in range(len(offsets))])
+	for i in range(len(offsets)): #Use proportion of theoretical to weight measurement
+		demixed = (conversion.createCurvePixelSpace(solution[i], offsets[i], maxValue) / ideal) * measurement
+		resultDict[pId[i]] = int(solution[i]), conversion.convertPixelToPhysical(demixed[offsets[i]:offsets[i] + calibration.pixelEnd])
 	return resultDict
 
 def solveLeastSquares(offsets, lossFunction): #xOffsets

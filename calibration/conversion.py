@@ -2,14 +2,12 @@ import numpy as np
 import calibration.calib as calibration
 from matplotlib import pyplot as plt
 
-def cameraResponse(i):
-	return np.exp(-0.5 * np.square( (i - (calibration.pixelEnd/2)) / (calibration.pixelEnd / 5) )) * 10**(-10)
 
 def convertPhysicalToPixel(planckData):
-	return planckData * cameraResponse(calibration.pixelX)
+	return planckData * calibration.cameraResponse()
 
 def convertPixelToPhysical(pixelData):
-	return pixelData / cameraResponse(calibration.pixelX)
+	return pixelData / calibration.cameraResponse()
 
 
 c1 = 1.19 / (10**16)
@@ -38,9 +36,6 @@ def createCurvePixelSpace(T, pixelShift, maxOffset):
 	shiftedI[pixelShift:calibration.pixelEnd + pixelShift] = convertPhysicalToPixel(raw)
 	tempLookup[(T, pixelShift)] = shiftedI
 	return shiftedI
-
-def createCurvePhysicalSpace(T):
-	return plancksLaw(calibration.pixelToWavelength(), T)
 
 '''
 temps = [2350, 2750, 2350, 2520]

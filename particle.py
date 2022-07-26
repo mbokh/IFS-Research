@@ -32,3 +32,4 @@ class Particle:
 
 	def addSpectraData(self, data):  #temp, spectra, code
 		self.spectraData.append(data)
+		assert(len(self.spectraData) == len(self.particleData))

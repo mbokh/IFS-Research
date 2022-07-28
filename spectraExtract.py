@@ -3,16 +3,15 @@ import cv2
 import math
 import time
 
-import videoSource
 import colorID
 import database
-import calibration.calib as calibration
-import calibration.conflictResolution as conflictResolution
-import calibration.conversion as conversion
+import calib as calibration
+import conflictResolution as conflictResolution
+import conversion as conversion
 
-spectraLineAngle = 2.2 #Degrees, positive because in image plane, y axis is "down"
-mappingTransform = np.array([[1, 0, -349],
-							 [0, 1, -5],
+spectraLineAngle = calibration.SPECTRA_ANGLE #Degrees, positive because in image plane, y axis is "down"
+mappingTransform = np.array([[1, 0, calibration.OFFSET_TO_CENTROID[0]],
+							 [0, 1, calibration.OFFSET_TO_CENTROID[1]],
 							 [0, 0, 1]])
 pointsRotationTransform = np.array([[math.cos(-spectraLineAngle * (math.pi / 180.0)), -math.sin(-spectraLineAngle * (math.pi / 180.0)), 0],
 							  [math.sin(-spectraLineAngle * (math.pi / 180.0)), math.cos(-spectraLineAngle * (math.pi / 180.0)), 0],
@@ -22,8 +21,8 @@ paddingTransform = np.array([[1, 0, 0],
 							 [0, 1, padding],
 							 [0, 0, 1]])
 
-extendLeft = calibration.getExtendsLeft()
-extendRight = calibration.getExtendsRight() - 1
+extendLeft = calibration.EXTEND_LEFT
+extendRight = calibration.EXTEND_RIGHT - 1
 
 def mapParticleToSpectra(x, y):
 	coords = np.array([x, y, 1])
@@ -32,7 +31,7 @@ def mapParticleToSpectra(x, y):
 	m = np.matmul(pointsRotationTransform, m)
 	return int(m[0]), int(m[1])
 
-def addBlackPadding(f):
+def addBlackPadding(f, videoSource):
 	newFrame = np.zeros((videoSource.getHeight() + padding, videoSource.getWidth() + padding, 3), np.uint8)
 	newFrame[padding:, :-padding] = f[:, :]
 	return newFrame
@@ -59,10 +58,9 @@ def subtractRange(initialSet, operand):
 	return processed
 
 
-def extractRawSpectra(frame):
-	t = time.time_ns()
+def extractRawSpectra(frame, video):
 	origHeight, origWidth = frame.shape[:2]
-	padded = addBlackPadding(frame)
+	padded = addBlackPadding(frame, video)
 
 	height, width = padded.shape[:2]
 	rotate_matrix = cv2.getRotationMatrix2D(center=(0, padding), angle=spectraLineAngle, scale=1)
@@ -147,7 +145,6 @@ def extractRawSpectra(frame):
 
 	#Log in database
 	database.addSpectraData(finalSpectra)
-	print((time.time_ns() - t) / 1000000000)
 	return debugImage, finalSpectra
 
 

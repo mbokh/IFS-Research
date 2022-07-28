@@ -1,6 +1,6 @@
 import numpy as np
-import calibration.conversion as conversion
-import calibration.calib as calibration
+import conversion as conversion
+import calib as calibration
 from scipy.optimize import least_squares
 import sys
 import time
@@ -36,7 +36,7 @@ def resolve(measurement, pixelOffsets):  #pId -> offset
 			residue = residue - conversion.createCurvePixelSpace(params[i], offsets[i], maxValue)  # Can't use -=
 		return np.sum(np.absolute(residue))
 
-	t = time.time_ns()
+	#t = time.time_ns()
 	solution = solveLeastSquares(offsets, lossFunction)
 	#print((time.time_ns() - t) / 1000000000)
 	if len(offsets) < 5:
@@ -45,13 +45,13 @@ def resolve(measurement, pixelOffsets):  #pId -> offset
 		if lossFunction(bruteForceSolution) < lossFunction(solution):
 			solution = bruteForceSolution
 
-	print((time.time_ns() - t) / 1000000000)
+	#print((time.time_ns() - t) / 1000000000)
 
 	resultDict = dict()
 	ideal = sum([conversion.createCurvePixelSpace(solution[i], offsets[i], maxValue) for i in range(len(offsets))])
 	for i in range(len(offsets)): #Use proportion of theoretical to weight measurement
 		demixed = (conversion.createCurvePixelSpace(solution[i], offsets[i], maxValue) / ideal) * measurement
-		resultDict[pId[i]] = int(solution[i]), conversion.convertPixelToPhysical(demixed[offsets[i]:offsets[i] + calibration.pixelEnd])
+		resultDict[pId[i]] = int(solution[i]), conversion.convertPixelToPhysical(demixed[offsets[i]:offsets[i] + calibration.PIXEL_END])
 	return resultDict
 
 def solveLeastSquares(offsets, lossFunction): #xOffsets
@@ -59,16 +59,16 @@ def solveLeastSquares(offsets, lossFunction): #xOffsets
 	lowerBound = []
 	upperBound = []
 	for _ in offsets:
-		initialGuess.append((calibration.minTemp + calibration.maxTemp) / 2)
-		lowerBound.append(calibration.minTemp)
-		upperBound.append(calibration.maxTemp)
+		initialGuess.append((calibration.MIN_TEMP + calibration.MAX_TEMP) / 2)
+		lowerBound.append(calibration.MIN_TEMP)
+		upperBound.append(calibration.MAX_TEMP)
 
 	return least_squares(lossFunction, x0=initialGuess, bounds=(lowerBound, upperBound)).x
 
 
 def solveBruteForce(offsets, lossFunction):
-	minTemps = [calibration.minTemp for i in offsets]
-	maxTemps = [calibration.maxTemp for i in offsets]
+	minTemps = [calibration.MIN_TEMP for i in offsets]
+	maxTemps = [calibration.MAX_TEMP for i in offsets]
 
 	for iterations in range(3):
 		combinationTempHelper([], minTemps, maxTemps, lossFunction, len(offsets))

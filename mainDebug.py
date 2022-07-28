@@ -3,16 +3,17 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 import tracking
-import videoSource
+from videoSources import VideoFactory
 import frameDecoration
 import spectraExtract
 
 def identityTransform(coords):
 	return coords
 
-video = videoSource.VideoSource("MF_AlZr.avi", skip=250, end=-1)
+video = VideoFactory.getVideoSource("Al3Zr_SM_30k_Run2.avi")
 tracker = tracking.MultiObjectTracker()
 decorator = frameDecoration.FrameDecorator()
+
 
 matplotlib.use('TkAgg')
 graph = plt.figure()
@@ -26,10 +27,11 @@ while True:
 		print("Video Done")
 		break
 
-	tracker.processImage(frame, frameNum)
-	f, spectra = spectraExtract.extractRawSpectra(frame)
+	tracker.processImage(frame, frameNum, video)
+	f, spectra = spectraExtract.extractRawSpectra(frame, video)
+	cv2.imshow('Original', frame)
 	cv2.imshow('frame', decorator.decorateFrame(frame, frameNum, identityTransform, showDebugInfo=True, showOccluded=True, showPath=False))
-	cv2.imshow('Rotated', cv2.resize(f[:300, :700], (1400, 600)))
+	cv2.imshow('Rotated', f)
 
 	plt.clf()
 

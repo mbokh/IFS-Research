@@ -1,13 +1,13 @@
 import numpy as np
-import calibration.calib as calibration
+import calib as calibration
 from matplotlib import pyplot as plt
 
 
 def convertPhysicalToPixel(planckData):
-	return planckData * calibration.cameraResponse()
+	return planckData * calibration.SYSTEM_RESPONSE
 
 def convertPixelToPhysical(pixelData):
-	return pixelData / calibration.cameraResponse()
+	return pixelData / calibration.SYSTEM_RESPONSE
 
 
 c1 = 1.19 / (10**16)
@@ -30,10 +30,10 @@ def createCurvePixelSpace(T, pixelShift, maxOffset):
 
 	if (T, pixelShift) in tempLookup.keys(): #Lookup needs to be float, not int, or else small steps of least-squares will round to same int
 		return tempLookup[(T, pixelShift)]
-	raw = plancksLaw(calibration.pixelToWavelength(), T)
+	raw = plancksLaw(calibration.PIXEL_TO_WAVELENGTH, T)
 
-	shiftedI = np.zeros(calibration.pixelEnd + maxOffset)
-	shiftedI[pixelShift:calibration.pixelEnd + pixelShift] = convertPhysicalToPixel(raw)
+	shiftedI = np.zeros(calibration.PIXEL_END + maxOffset)
+	shiftedI[pixelShift:calibration.PIXEL_END + pixelShift] = convertPhysicalToPixel(raw)
 	tempLookup[(T, pixelShift)] = shiftedI
 	return shiftedI
 
@@ -44,11 +44,10 @@ offsets = [0, 10, 40, 50]
 curves = [createCurvePixelSpace(temps[i], offsets[i], offsets[-1]) for i in range(len(temps))]
 combinedIntensities = sum(curves)
 
-combinedX = np.linspace(0, calibration.pixelEnd + offsets[-1] - 1, calibration.pixelEnd + offsets[-1])
+combinedX = np.linspace(0, calibration.PIXEL_END + offsets[-1] - 1, calibration.PIXEL_END + offsets[-1])
 fig, axs = plt.subplots(2, 1)
 for c in curves:
 	axs[0].plot(combinedX, c)
 axs[1].plot(combinedX, combinedIntensities, 'g')
 fig.tight_layout()
-plt.show()
-'''
+plt.show()'''

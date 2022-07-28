@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import tracking
-import videoSource
+from videoSources import videoSource
 import frameDecoration
 import dataLogger
 import spectraExtract

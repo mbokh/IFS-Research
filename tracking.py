@@ -2,18 +2,18 @@ import math
 from scipy.optimize import linear_sum_assignment
 import cv2
 import numpy as np
-import videoSource
 import database
 
 LARGE_WEIGHT = 100000
 
-def detectObjects(img):
+def detectObjects(img, videoSource):
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 	blured = cv2.GaussianBlur(gray, (11, 11), 0, 0)
 	sharpened = cv2.addWeighted(gray, 5, blured, -4, 0)
 
-	cv2.rectangle(sharpened, (0, 0), (videoSource.getSpectraPartition(), videoSource.getHeight()), 0, -1) #Block the spectra
+	spectraStart, spectraEnd = videoSource.getSpectraPartition()
+	cv2.rectangle(sharpened, (spectraStart, 0), (spectraEnd, videoSource.getHeight()), 0, -1) #Block the spectra
 
 	binary = cv2.threshold(sharpened, 40, 255, cv2.THRESH_BINARY)[1]
 
@@ -29,7 +29,9 @@ def detectObjects(img):
 		h = stats[i, cv2.CC_STAT_HEIGHT]
 		(cX, cY) = centroids[i]
 
-		if w == 1 and h == 1:
+		#if w == 1 and h == 1:
+		#	continue
+		if w * h <= 10:
 			continue
 		data.append((x, y, w, h, cX, cY))
 
@@ -154,8 +156,8 @@ class MultiObjectTracker:
 	def __init__(self):
 		self.applyHungarian = False
 
-	def processImage(self, img, frameNum):
-		boundingBoxes, grayscale = detectObjects(img)
+	def processImage(self, img, frameNum, video):
+		boundingBoxes, grayscale = detectObjects(img, video)
 
 		if not self.applyHungarian and len(boundingBoxes) != 0: #First time seeing particles, no Hungarian alg needed
 			self.applyHungarian = True

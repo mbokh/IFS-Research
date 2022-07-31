@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from videoSources import videoSource
+from Sources import videoSource
 import tracking
 import frameDecoration
 

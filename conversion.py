@@ -23,11 +23,6 @@ def plancksLaw(wavelengths, T):
 
 #Returns the appropriate response-shaped curve in pixel space in both x and y
 def createCurvePixelSpace(T, pixelShift, maxOffset):
-	'''if not T in tempLookup.keys():
-		tempLookup[T] = plancksLaw(calibration.pixelToWavelength(), T)
-	return np.pad(tempLookup[T], (pixelShift, maxOffset - pixelShift))
-	'''
-
 	if (T, pixelShift) in tempLookup.keys(): #Lookup needs to be float, not int, or else small steps of least-squares will round to same int
 		return tempLookup[(T, pixelShift)]
 	raw = plancksLaw(calibration.PIXEL_TO_WAVELENGTH, T)

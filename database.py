@@ -44,3 +44,8 @@ def getLastBoundingBoxes():
 def addSpectraData(spectraDict):
 	for pId in spectraDict:
 		getParticleById(pId).addSpectraData(spectraDict[pId])
+
+def getFullDataForPickling():
+	for pId in particles:
+		particles[pId].prepareForPickling()
+	return particles

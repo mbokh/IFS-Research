@@ -8,6 +8,20 @@ LARGE_WEIGHT = 100000
 
 def detectObjects(img, videoSource):
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+	medianBlured = cv2.medianBlur(gray, 3)
+
+	structElement = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+	#dilated = cv2.dilate(medianBlured, structElement)
+
+	blured = cv2.GaussianBlur(medianBlured, (11, 11), 0, 0)
+	sharpened = cv2.addWeighted(medianBlured, 5, blured, -4, 0)
+
+	spectraStart, spectraEnd = videoSource.getSpectraPartition()
+	cv2.rectangle(sharpened, (spectraStart, 0), (spectraEnd, videoSource.getHeight()), 0, -1)  # Block the spectra
+
+	binary = cv2.threshold(sharpened, 40, 255, cv2.THRESH_BINARY)[1]
+	'''
+	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 	blured = cv2.GaussianBlur(gray, (11, 11), 0, 0)
 	sharpened = cv2.addWeighted(gray, 5, blured, -4, 0)
@@ -16,7 +30,7 @@ def detectObjects(img, videoSource):
 	cv2.rectangle(sharpened, (spectraStart, 0), (spectraEnd, videoSource.getHeight()), 0, -1) #Block the spectra
 
 	binary = cv2.threshold(sharpened, 40, 255, cv2.THRESH_BINARY)[1]
-
+	'''
 	numRegions, labels, stats, centroids = cv2.connectedComponentsWithStats(binary, 8, cv2.CV_32S)
 
 	data = []
@@ -29,9 +43,7 @@ def detectObjects(img, videoSource):
 		h = stats[i, cv2.CC_STAT_HEIGHT]
 		(cX, cY) = centroids[i]
 
-		#if w == 1 and h == 1:
-		#	continue
-		if w * h <= 10:
+		if w * h < 2:
 			continue
 		data.append((x, y, w, h, cX, cY))
 
@@ -93,11 +105,20 @@ def iterativelyFindBetterSolutions(rows, cols, costMatrix, oldCost):
 				break
 		newCostMatrix[rows[index], length - 1] = 0
 
-def getBrightnessAtPoint(img, x, y):
-	return int(img[boundInt(y, 0, img.shape[1]), boundInt(x, 0, img.shape[0])])
+def getBrightnessAroundPoint(img, x, y):
+	v = int(img[boundInt(y + 1, 0, img.shape[0]), boundInt(x - 1, 0, img.shape[1])]) + \
+		int(img[boundInt(y + 1, 0, img.shape[0]), boundInt(x, 0, img.shape[1])]) + \
+		int(img[boundInt(y + 1, 0, img.shape[0]), boundInt(x + 1, 0, img.shape[1])]) + \
+		int(img[boundInt(y, 0, img.shape[0]), boundInt(x - 1, 0, img.shape[1])]) + \
+		int(img[boundInt(y, 0, img.shape[0]), boundInt(x, 0, img.shape[1])]) + \
+		int(img[boundInt(y, 0, img.shape[0]), boundInt(x + 1, 0, img.shape[1])]) + \
+		int(img[boundInt(y - 1, 0, img.shape[0]), boundInt(x - 1, 0, img.shape[1])]) + \
+		int(img[boundInt(y - 1, 0, img.shape[0]), boundInt(x, 0, img.shape[1])]) + \
+		int(img[boundInt(y - 1, 0, img.shape[0]), boundInt(x + 1, 0, img.shape[1])])
+	return int(v / 9)
 
-def boundInt(v, minV, maxV):
-	return int(min(max(v, minV), maxV))
+def boundInt(v, minV, maxV): #Max is exclusive
+	return int(min(max(v, minV), maxV - 1))
 
 
 def calculateCost(previousPrediction, currentBBox, particle, newGray):
@@ -109,7 +130,7 @@ def calculateCost(previousPrediction, currentBBox, particle, newGray):
 	sizeCost = 100 if size >= 25 else 0.07 * size * size
 
 
-	brightnessDelta = abs(particle.getPreviousBrightness() - getBrightnessAtPoint(newGray, currentBBox[4], currentBBox[5]))
+	brightnessDelta = abs(particle.getPreviousBrightness() - getBrightnessAroundPoint(newGray, currentBBox[4], currentBBox[5]))
 	brightnessCost = 100 if brightnessDelta >= 50 else 0.02 * brightnessDelta * brightnessDelta
 
 
@@ -162,7 +183,7 @@ class MultiObjectTracker:
 		if not self.applyHungarian and len(boundingBoxes) != 0: #First time seeing particles, no Hungarian alg needed
 			self.applyHungarian = True
 			for b in boundingBoxes:
-				database.createNewParticle(b, getBrightnessAtPoint(grayscale, b[4], b[5]), frameNum)
+				database.createNewParticle(b, getBrightnessAroundPoint(grayscale, b[4], b[5]), frameNum)
 			return
 		#Not the first frame with particle, now need Hungarian
 		previousIds = database.getIdsOfPreviousFrame()
@@ -176,9 +197,9 @@ class MultiObjectTracker:
 		for i in range(len(rows)):
 			if rows[i] >= len(previousIds): #Particle appears
 				b = boundingBoxes[cols[i]]
-				database.createNewParticle(b, getBrightnessAtPoint(grayscale, b[4], b[5]), frameNum)
+				database.createNewParticle(b, getBrightnessAroundPoint(grayscale, b[4], b[5]), frameNum)
 			elif cols[i] >= len(boundingBoxes): #Particle dissappears
 				database.isOccluded(previousIds[rows[i]])
 			else: #Assignment
 				b = boundingBoxes[cols[i]]
-				database.assignNewData(previousIds[rows[i]], b, getBrightnessAtPoint(grayscale, b[4], b[5]))
+				database.assignNewData(previousIds[rows[i]], b, getBrightnessAroundPoint(grayscale, b[4], b[5]))

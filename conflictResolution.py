@@ -3,7 +3,6 @@ import conversion as conversion
 import calib as calibration
 from scipy.optimize import least_squares
 import sys
-import time
 
 tempGranularity = 12
 

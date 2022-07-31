@@ -132,7 +132,7 @@ def extractRawSpectra(frame, video):
 		spectra = averageOverRanges(imageSlice, minBound, maxBound, [(particles[conflictId][0][1], particles[conflictId][0][3])], particles[conflictId][1])
 
 		resultDict = conflictResolution.resolve(spectra, offsets) #pId -> temp, spectra
-		for pId in resultDict:
+		for pId in resultDict: #Have to flip spectra since we want lower wavelengths on the left side
 			finalSpectra[pId] = (resultDict[pId][0], resultDict[pId][1], 4)
 			if conflictId in unresolvableConflicts:
 				del unresolvableConflicts[pId]

@@ -9,15 +9,15 @@ import cv2
 # sStart            sEnd
 class VideoSource:
 	def __init__(self, filename, skip, end, spectraStart, spectraEnd):
-		self.video = cv2.VideoCapture(filename)
+		self.video = cv2.VideoCapture("Sources/" + filename)
 		for i in range(skip):
 			ret, frame = self.video.read()
 		self.frameNum = 0
 		self.end = end
 		self.height = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))
 		self.width = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))
-		self.spectraStart = spectraStart
-		self.spectraEnd = spectraEnd
+		self.spectraStart = max(0, min(spectraStart, self.width - 1))
+		self.spectraEnd = max(0, min(spectraEnd, self.width - 1))
 
 	def getFrame(self):
 		self.frameNum += 1

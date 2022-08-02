@@ -11,8 +11,7 @@ import spectraExtract
 def identityTransform(coords):
 	return coords
 
-#video = VideoSource.VideoSource(filename="Sources/Al3Zr_SM_30k_Run2.avi", skip=0, end=-1, spectraStart=150, spectraEnd=1024 - 1)
-video = FramesSource.FramesSource(prefix="Al3Zr_SM_30k_30k_sh_g15_5mm_toff_0ms_Run2", skip=0, end=-1, spectraStart=150, spectraEnd=1024 - 1)
+video = VideoSource.VideoSource(filename="Al3Zr_SM_30k_Run2.avi", skip=0, end=-1, spectraStart=150, spectraEnd=1023)
 tracker = tracking.MultiObjectTracker()
 decorator = frameDecoration.FrameDecorator()
 

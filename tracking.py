@@ -10,9 +10,6 @@ def detectObjects(img, videoSource):
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 	medianBlured = cv2.medianBlur(gray, 3)
 
-	structElement = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-	#dilated = cv2.dilate(medianBlured, structElement)
-
 	blured = cv2.GaussianBlur(medianBlured, (11, 11), 0, 0)
 	sharpened = cv2.addWeighted(medianBlured, 5, blured, -4, 0)
 
@@ -20,17 +17,7 @@ def detectObjects(img, videoSource):
 	cv2.rectangle(sharpened, (spectraStart, 0), (spectraEnd, videoSource.getHeight()), 0, -1)  # Block the spectra
 
 	binary = cv2.threshold(sharpened, 40, 255, cv2.THRESH_BINARY)[1]
-	'''
-	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-	blured = cv2.GaussianBlur(gray, (11, 11), 0, 0)
-	sharpened = cv2.addWeighted(gray, 5, blured, -4, 0)
-
-	spectraStart, spectraEnd = videoSource.getSpectraPartition()
-	cv2.rectangle(sharpened, (spectraStart, 0), (spectraEnd, videoSource.getHeight()), 0, -1) #Block the spectra
-
-	binary = cv2.threshold(sharpened, 40, 255, cv2.THRESH_BINARY)[1]
-	'''
 	numRegions, labels, stats, centroids = cv2.connectedComponentsWithStats(binary, 8, cv2.CV_32S)
 
 	data = []
@@ -88,12 +75,12 @@ def iterativelyFindBetterSolutions(rows, cols, costMatrix, oldCost):
 		cols = newCols
 		costMatrix = newCostMatrix
 
-		length = newCostMatrix.shape[0]
+		length = newCostMatrix.shape[0] #Set newly added col/rows to large weight
 		for i in range(length):
 			newCostMatrix[length - 1, i] = LARGE_WEIGHT
 			newCostMatrix[i, length - 1] = LARGE_WEIGHT
 
-		index = 0
+		index = 0  #For the specific assignments made, make them 0 weight
 		for v in range(len(rows)):
 			if rows[v] == length - 1:
 				index = v
@@ -162,8 +149,8 @@ def calculateInitialCostMatrix(previousIds, boundingBoxes, newGray):
 
 	for i in range(size):
 		for j in range(size):
-			if 0 < costMatrix[i, j] < 15:
-				for k in range(size):
+			if 0 < costMatrix[i, j] < 15: #If the cost is so small, it must be a good fit, so make sure it gets chosen by making all
+				for k in range(size): #other weights very large
 					if costMatrix[i, k] > 0 and k != j:
 						costMatrix[i, k] = LARGE_WEIGHT
 				for k in range(size):

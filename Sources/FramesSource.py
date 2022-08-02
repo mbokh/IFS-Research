@@ -21,7 +21,7 @@ def getStringedNumber(x):
 	return str(x)
 
 def getFilePath(fileNum, prefix):
-	return "Videos/" + prefix + "/" + prefix + getStringedNumber(fileNum) + ".tif"
+	return "Sources/" + prefix + "/" + prefix + getStringedNumber(fileNum) + ".tif"
 
 class FramesSource:
 	def __init__(self, prefix, skip, end, spectraStart, spectraEnd):

@@ -196,12 +196,12 @@ plt.ion()
 plt.show()
 
 
-outVideo = cv2.VideoWriter("CompiledVideoPaths.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (2000, 1200))
+outVideo = cv2.VideoWriter("CompiledVideo.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (2000, 1200))
 
-with open('extractedDataMedianBlurThresh2.pickle', 'rb') as f:
+with open('extractedData.pickle', 'rb') as f:
 	minWavelength, maxWavelength, particles = pickle.load(f)
 
-	video = VideoSource.VideoSource(filename="Sources/Al3Zr_SM_30k_Run2.avi", skip=0, end=-1, spectraStart=150, spectraEnd=1024 - 1)
+	video = VideoSource.VideoSource(filename="Al3Zr_SM_30k_Run2.avi", skip=0, end=-1, spectraStart=150, spectraEnd=1024 - 1)
 
 	while True:
 		frame, frameNum = video.getFrame()
@@ -210,7 +210,7 @@ with open('extractedDataMedianBlurThresh2.pickle', 'rb') as f:
 			break
 
 		resized = cv2.resize(frame[220:520, 0:500], (2000, 1200)) #X, Y
-		resized = decorateFrame(particles, resized, frameNum, showDebugInfo=True, showPath=True, fullBoundingBox=False)
+		resized = decorateFrame(particles, resized, frameNum, showDebugInfo=True, showPath=False, fullBoundingBox=False)
 
 		makeTempGraph(particles, frameNum)
 

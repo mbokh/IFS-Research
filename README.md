@@ -3,7 +3,7 @@ This repo contains code to process hyperspectral images/videos as produced by th
 
 This software was developed in Python 3.7, but any reasonably close version should suffice. Additionally, it has dependencies on `opencv-python`, `matplotlib`, `numpy`, `scipy`, as well as their own dependencies
 
-In order to begin the processing, put the hyperspectral video (or a folder containing the frames) in the `Sources` folder. Then, open the script `mainExtractData.py` and edit this line: `video = VideoSource.VideoSource(filename="ENTER FILE NAME HERE", skip=0, end=-1, spectraStart=150, spectraEnd=1023)` to put in the name of the video file in the filename argument.  In addition, specify the x range over which the spectral lines appear. These values do not have to particularly exact, they are simply used to isolate certain regions of the frames to look for either spectral lines or particles.
+In order to begin the processing, put the hyperspectral video (or a folder containing the frames) in the `sources` folder. Then, open the script `mainExtractData.py` and edit this line: `video = VideoSource.VideoSource(filename="ENTER FILE NAME HERE", skip=0, end=-1, spectraStart=150, spectraEnd=1023)` to put in the name of the video file in the filename argument.  In addition, specify the x range over which the spectral lines appear. These values do not have to particularly exact, they are simply used to isolate certain regions of the frames to look for either spectral lines or particles.
 
 Running this script will create a pickle file which contains all the useful information extracted from the video. Depending on how long / complex the video is, extraction could take over an hour, but it will print out its progress periodically. 
 
@@ -15,6 +15,8 @@ particleId, frameNumber, temperature, [spectraArray], spectraCode, [boundingBox]
 ```
 
 You can also run the `mainCreateCompiledVideo.py` script, which will render a video showing physical-space particles, color-coded bounding boxes "corners", a graph of temperature and spectra in time. Due to the large number of particles in the video, this is not intended to provide any substantial quantitative information for further research, nor does it incorporate all of the extracted information. It is simply as a way to conveniently view data and have a "big picture" view into the data.
+
+All the extracted data (pickle files, video files, csv files), will appear in the `extractedData` folder.
 
 # Documentation
 Although some object-oriented design efforts are lost on Python, I tried to reasonably structure my code to follow those principles, which would facilitate porting to a different and faster language in the future. 

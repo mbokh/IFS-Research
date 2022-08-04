@@ -1,4 +1,4 @@
-import particle
+from backend import particle
 
 
 idsInPreviousFrame = set()

@@ -1,6 +1,6 @@
 import cv2
-import colorID
-import database
+from backend import colorID, database
+
 
 class FrameDecorator:
 	def __init__(self):

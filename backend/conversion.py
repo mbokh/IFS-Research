@@ -1,6 +1,5 @@
 import numpy as np
-import calib as calibration
-from matplotlib import pyplot as plt
+from backend import calib as calibration
 
 
 def convertPhysicalToPixel(planckData):

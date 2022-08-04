@@ -104,10 +104,9 @@ MIN_TEMP = 2000.0
 MAX_TEMP = 3000.0
 PIXEL_TO_WAVELENGTH = MIN_WAVELENGTH + (MAX_WAVELENGTH - MIN_WAVELENGTH)*(pixelX / PIXEL_END)
 
-'''
-import matplotlib.pyplot as plt
-#plt.plot(measuredCalibration, 'o')
+
+#import matplotlib.pyplot as plt
+#plt.plot(measuredCalibration, '--')
 #plt.plot(interpolatedSpectra, '-')
-plt.plot(SYSTEM_RESPONSE, '--')
-plt.show()
-'''
+#plt.plot(SYSTEM_RESPONSE, '--')
+#plt.show()

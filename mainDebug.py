@@ -2,11 +2,9 @@ import cv2
 import matplotlib
 import matplotlib.pyplot as plt
 
-import tracking
-from Sources import VideoSource
-from Sources import FramesSource
-import frameDecoration
-import spectraExtract
+from sources import VideoSource
+from backend import frameDecoration, spectraExtract, tracking
+
 
 def identityTransform(coords):
 	return coords
@@ -34,12 +32,12 @@ while True:
 	cv2.imshow('frame', decorator.decorateFrame(frame, frameNum, identityTransform, showDebugInfo=True, showOccluded=True, showPath=False))
 	#cv2.imshow('Rotated', f)
 
-	plt.clf()
-
+	#plt.clf()
+	'''
 	for pId in spectra:
 		code = spectra[pId][2]
-		s = spectra[pId][1]
-		temperature = spectra[pId][0]
+		s = spectra[pI        d][1]
+		temperature = spectra[pId][0]         
 		#print(str(pId) + ": " + str(code))
 		color = "green"
 		if code == 1:
@@ -52,7 +50,7 @@ while True:
 			color = "black"
 		plt.plot(s, label=("id: " + str(pId) + ", T: " + str(temperature)), color=color)
 		plt.legend()
-
+	'''
 	plt.title("Frame Number: " + str(frameNum))
 	plt.draw()
 	graph.canvas.flush_events()

@@ -1,9 +1,5 @@
-import database
-import tracking
-from Sources import VideoSource
-from Sources import FramesSource
-import spectraExtract
-import calib
+from sources import VideoSource
+from backend import calib, database, spectraExtract, tracking
 
 import pickle
 import time
@@ -31,5 +27,5 @@ video.destroy()
 print("Extraction took "  + str((time.time_ns() - startTime) / 1000000000) + " seconds")
 
 data = (calib.MIN_WAVELENGTH, calib.MAX_WAVELENGTH, database.getFullDataForPickling())
-with open('extractedData.pickle', 'wb') as pickleFile:
+with open('extractedData/extractedDataSquaredLoss1.pickle', 'wb') as pickleFile:
 	pickle.dump(data, pickleFile)

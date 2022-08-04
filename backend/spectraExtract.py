@@ -1,13 +1,9 @@
 import numpy as np
 import cv2
 import math
-import time
+import matplotlib.pyplot as plt
 
-import colorID
-import database
-import calib as calibration
-import conflictResolution as conflictResolution
-import conversion as conversion
+from backend import calib as calibration, colorID, conflictResolution as conflictResolution, conversion as conversion, database
 
 spectraLineAngle = calibration.SPECTRA_ANGLE #Degrees, positive because in image plane, y axis is "down"
 mappingTransform = np.array([[1, 0, calibration.OFFSET_TO_CENTROID[0]],
@@ -97,6 +93,8 @@ def extractRawSpectra(frame, video):
 			resolvableConflicts[i] = (averageOverRanges(gray, particles[i][0][0], particles[i][0][2], data, particles[i][1]), code)
 		else:
 			unresolvableConflicts[i] = (data, gray.copy()) # A little expensive to copy, but worth the trouble
+
+
 	#Try to subtract away known spectra
 	oldLength = len(unresolvableConflicts)
 	while len(unresolvableConflicts) > 0:
@@ -142,6 +140,18 @@ def extractRawSpectra(frame, video):
 		temp = conflictResolution.resolve(resolvableConflicts[pId][0], {pId: 0})
 		originalSpectra = conversion.convertPixelToPhysical(resolvableConflicts[pId][0])
 		finalSpectra[pId] = (temp[pId][0], originalSpectra, resolvableConflicts[pId][1])
+
+		'''plt.clf()
+		##plt.plot(originalSpectra, '--')
+		curve = conversion.plancksLaw(calibration.PIXEL_TO_WAVELENGTH, temp[pId][0])
+		print(temp[pId][0])
+		#plt.plot(curve)
+		plt.plot(resolvableConflicts[pId][0], color="red", linewidth='0.6')
+		plt.plot(np.flip(resolvableConflicts[pId][0]), color='blue', linewidth='0.6')
+		plt.plot(conversion.convertPhysicalToPixel(conversion.plancksLaw(calibration.PIXEL_TO_WAVELENGTH, temp[pId][0])), color='green')
+		plt.show()'''
+
+
 
 	#Log in database
 	database.addSpectraData(finalSpectra)

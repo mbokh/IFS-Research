@@ -1,6 +1,5 @@
 import numpy as np
-import conversion as conversion
-import calib as calibration
+from backend import calib as calibration, conversion
 from scipy.optimize import least_squares
 import sys
 
@@ -33,7 +32,7 @@ def resolve(measurement, pixelOffsets):  #pId -> offset
 		residue = measurement.copy()
 		for i in range(len(offsets)):
 			residue = residue - conversion.createCurvePixelSpace(params[i], offsets[i], maxValue)  # Can't use -=
-		return np.sum(np.absolute(residue))
+		return np.sum(np.square(residue))
 
 	#t = time.time_ns()
 	solution = solveLeastSquares(offsets, lossFunction)

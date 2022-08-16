@@ -141,21 +141,17 @@ def extractRawSpectra(frame, video):
 		originalSpectra = conversion.convertPixelToPhysical(resolvableConflicts[pId][0])
 		finalSpectra[pId] = (temp[pId][0], originalSpectra, resolvableConflicts[pId][1])
 
-		'''plt.clf()
-		##plt.plot(originalSpectra, '--')
+		plt.clf()
+		plt.plot(np.flip(originalSpectra))
 		curve = conversion.plancksLaw(calibration.PIXEL_TO_WAVELENGTH, temp[pId][0])
-		print(temp[pId][0])
-		#plt.plot(curve)
-		plt.plot(resolvableConflicts[pId][0], color="red", linewidth='0.6')
-		plt.plot(np.flip(resolvableConflicts[pId][0]), color='blue', linewidth='0.6')
-		plt.plot(conversion.convertPhysicalToPixel(conversion.plancksLaw(calibration.PIXEL_TO_WAVELENGTH, temp[pId][0])), color='green')
-		plt.show()'''
-
+		#print(temp[pId][0])
+		plt.plot(curve)
+		plt.show()
 
 
 	#Log in database
 	database.addSpectraData(finalSpectra)
-	return debugImage, finalSpectra
+	return debugImage
 
 
 def getSubtractionBounds(baseBox, conflictBox, conflictSpectra): #Particle positions

@@ -20,7 +20,7 @@ while True:
 		print(frameNum)
 
 	tracker.processImage(frame, frameNum, video)
-	f, spectra = spectraExtract.extractRawSpectra(frame, video)
+	f = spectraExtract.extractRawSpectra(frame, video)
 
 video.destroy()
 

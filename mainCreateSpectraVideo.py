@@ -58,7 +58,7 @@ outVideo = None
 plt.ion()
 plt.show()
 
-with open('extractedData/extractedDataSquaredLoss.pickle', 'rb') as f:
+with open('extractedData/extractedDataSquaredLoss1.pickle', 'rb') as f:
 	minWavelength, maxWavelength, particleData = pickle.load(f)
 	frameNum = 0
 

@@ -93,7 +93,7 @@ def makeSpectraGraph(particles, frameNum, minWavelength, maxWavelength):
 	plt.clf()
 	plt.gca().set_xlabel('Wavelength (nm)')
 	plt.gca().set_ylim(0, 5 * (10**12))
-	plt.gca().set_xlim(4 * 1e-7, 8 * 1e-7) #Dummy bounds
+	plt.gca().set_xlim(5 * 1e-7, 7.5 * 1e-7) #Dummy bounds
 	plt.gca().xaxis.set_major_formatter(ticks.FuncFormatter(formatter))
 	for pId in particles:
 		p = particles[pId]

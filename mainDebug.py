@@ -27,7 +27,7 @@ while True:
 		break
 
 	tracker.processImage(frame, frameNum, video)
-	f, spectra = spectraExtract.extractRawSpectra(frame, video)
+	f = spectraExtract.extractRawSpectra(frame, video)
 	#cv2.imshow('Original', frame)
 	cv2.imshow('frame', decorator.decorateFrame(frame, frameNum, identityTransform, showDebugInfo=True, showOccluded=True, showPath=False))
 	#cv2.imshow('Rotated', f)

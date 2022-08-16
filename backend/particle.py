@@ -39,7 +39,8 @@ class Particle:
 		self.particleData.append((roundBBoxCentroid(bBox), brightness, 0))
 
 	def addSpectraData(self, data):  #temp, spectra, code
-		self.spectraData.append((data[0], data[1].astype(np.uint64).tolist(), data[2]))  #Want spectra as simple python list so that it can be pickled
+		#Flip spectra for final logging since they are backward during processing
+		self.spectraData.append((data[0], np.flip(data[1]).astype(np.uint64).tolist(), data[2]))  #Want spectra as simple python list so that it can be pickled
 		assert(len(self.spectraData) == len(self.particleData)) #Also values are ~10^11+, round to int to save space in pickle and csv file
 
 	def prepareForPickling(self):

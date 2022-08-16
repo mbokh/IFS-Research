@@ -2,6 +2,7 @@ import numpy as np
 from backend import calib as calibration, conversion
 from scipy.optimize import least_squares
 import sys
+import matplotlib.pyplot as plt
 
 tempGranularity = 12
 
@@ -31,8 +32,13 @@ def resolve(measurement, pixelOffsets):  #pId -> offset
 	def lossFunction(params):
 		residue = measurement.copy()
 		for i in range(len(offsets)):
-			residue = residue - conversion.createCurvePixelSpace(params[i], offsets[i], maxValue)  # Can't use -=
-		return np.sum(np.square(residue))
+			residue = residue - np.flip(conversion.createCurvePixelSpace(params[i], offsets[i], maxValue))  # Can't use -=
+		s = np.sum(np.abs(residue))
+
+		#plt.clf()
+		#plt.plot(residue)
+		#plt.show()
+		return s
 
 	#t = time.time_ns()
 	solution = solveLeastSquares(offsets, lossFunction)
@@ -46,9 +52,9 @@ def resolve(measurement, pixelOffsets):  #pId -> offset
 	#print((time.time_ns() - t) / 1000000000)
 
 	resultDict = dict()
-	ideal = sum([conversion.createCurvePixelSpace(solution[i], offsets[i], maxValue) for i in range(len(offsets))])
+	ideal = sum([np.flip(conversion.createCurvePixelSpace(solution[i], offsets[i], maxValue)) for i in range(len(offsets))])
 	for i in range(len(offsets)): #Use proportion of theoretical to weight measurement
-		demixed = (conversion.createCurvePixelSpace(solution[i], offsets[i], maxValue) / ideal) * measurement
+		demixed = (np.flip(conversion.createCurvePixelSpace(solution[i], offsets[i], maxValue)) / ideal) * measurement
 		resultDict[pId[i]] = int(solution[i]), conversion.convertPixelToPhysical(demixed[offsets[i]:offsets[i] + calibration.PIXEL_END])
 	return resultDict
 

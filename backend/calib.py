@@ -55,21 +55,23 @@ if data[0][2] * data[0][3] < data[1][2] * data[1][3]:
 spectraData = data[spectraIndex]
 particleData = data[1 - spectraIndex]
 
-
-OFFSET_TO_CENTROID = (spectraData[4] - particleData[4], spectraData[5] - particleData[5])
-EXTEND_LEFT = spectraData[4] - spectraData[0]
-EXTEND_RIGHT = spectraData[2] - EXTEND_LEFT
-#Technically this is slightly off because of the initial rotation, but since it's so small, we ignore it: ~400 cos(0.6) ~= 400
-
-vector = gray[spectraData[1]:spectraData[1] + spectraData[3] + 1, spectraData[0]:spectraData[0] + spectraData[2]].sum(axis=0)
-measuredCalibration = vector / (spectraData[3] * 8) #vector / (spectraData[3] * particleData[3]) Manually for weird shape
-
-
 def getWavelengthFromPixelPosition(x):
 	return int(PIXEL_TO_WAVELENGTH_SCALING * (x - pixelPositions[1]) + wavelengths[1])
 
-MAX_WAVELENGTH = getWavelengthFromPixelPosition(spectraData[0]) / 1000000000
-MIN_WAVELENGTH = getWavelengthFromPixelPosition(spectraData[0] + spectraData[2]) / 1000000000
+MAX_WAVELENGTH = min(750, getWavelengthFromPixelPosition(spectraData[0])) / 1000000000
+MIN_WAVELENGTH = max(500, getWavelengthFromPixelPosition(spectraData[0] + spectraData[2])) / 1000000000
+
+def getPixelPositionFromWavelength(w):
+	return int(((w - wavelengths[1]) / PIXEL_TO_WAVELENGTH_SCALING) + pixelPositions[1])
+
+OFFSET_TO_CENTROID = (spectraData[4] - particleData[4], spectraData[5] - particleData[5])
+EXTEND_LEFT = spectraData[4] - getPixelPositionFromWavelength(MAX_WAVELENGTH * 1000000000) #spectraData[4] - spectraData[0]
+EXTEND_RIGHT = getPixelPositionFromWavelength(MIN_WAVELENGTH * 1000000000) - spectraData[4] #spectraData[2] - EXTEND_LEFT
+#Technically this is slightly off because of the initial rotation, but since it's so small, we ignore it: ~400 cos(0.6) ~= 400
+
+vector = gray[spectraData[1]:spectraData[1] + spectraData[3] + 1, spectraData[4] - EXTEND_LEFT:spectraData[4] + EXTEND_RIGHT].sum(axis=0)
+measuredCalibration = vector / (spectraData[3] * 8) #vector / (spectraData[3] * particleData[3]) Manually for weird shape
+#Goes from greater wavelengths to smaller wavelengths
 
 
 #Now open known spectra file and only look at range [min wavelength, max wavelength]
@@ -92,10 +94,10 @@ with open("calibrationData/KnownSpectraExtracted.csv", 'r') as file:
 
 linInterp = interp1d(knownSpectraWavelengths, knownSpectraValues)
 
-interpolatedX = np.linspace(knownSpectraWavelengths[0], knownSpectraWavelengths[-1], num=EXTEND_RIGHT + EXTEND_LEFT, endpoint=True)
+interpolatedX = np.linspace(knownSpectraWavelengths[-1], knownSpectraWavelengths[0], num=EXTEND_RIGHT + EXTEND_LEFT, endpoint=True) #Reverse order to match raw data order
 interpolatedSpectra = linInterp(interpolatedX)
 
-SYSTEM_RESPONSE = measuredCalibration / interpolatedSpectra
+SYSTEM_RESPONSE = measuredCalibration / interpolatedSpectra #Ordered from greater to smaller wavelengths
 
 
 PIXEL_END = EXTEND_RIGHT + EXTEND_LEFT #Exclusive
@@ -108,5 +110,5 @@ PIXEL_TO_WAVELENGTH = MIN_WAVELENGTH + (MAX_WAVELENGTH - MIN_WAVELENGTH)*(pixelX
 #import matplotlib.pyplot as plt
 #plt.plot(measuredCalibration, '--')
 #plt.plot(interpolatedSpectra, '-')
-#plt.plot(SYSTEM_RESPONSE, '--')
+#plt.plot(vector, '--')
 #plt.show()

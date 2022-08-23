@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 # -------------------------Width
 # |                  |
@@ -24,7 +25,7 @@ def getFilePath(fileNum, prefix):
 	return "Sources/" + prefix + "/" + prefix + getStringedNumber(fileNum) + ".tif"
 
 class FramesSource:
-	def __init__(self, prefix, skip, end, spectraStart, spectraEnd):
+	def __init__(self, prefix, skip, end, spectraStart, spectraEnd, flipLR):
 		self.prefix = prefix
 		self.fileNum = skip + 1
 		self.frameNum = 0
@@ -34,6 +35,7 @@ class FramesSource:
 		self.width = int(frame.shape[1])
 		self.spectraStart = spectraStart
 		self.spectraEnd = spectraEnd
+		self.flipLR = flipLR
 
 	def getFrame(self):
 		self.frameNum += 1
@@ -41,7 +43,7 @@ class FramesSource:
 		self.fileNum += 1
 		if f is None or self.frameNum == self.end:
 			return None, self.frameNum
-		return f, self.frameNum
+		return (cv2.flip(f, 1) if self.flipLR else f), self.frameNum
 
 	def getWidth(self):
 		return self.width
@@ -50,7 +52,7 @@ class FramesSource:
 		return self.height
 
 	def getSpectraPartition(self):
-		return self.spectraStart, self.spectraEnd
+		return ((self.getWidth() - 1) - self.spectraEnd, (self.getWidth() - 1) - self.spectraStart) if self.flipLR else (self.spectraStart, self.spectraEnd)
 
 	def destroy(self):
 		return #Dummy method just to have method signatures identical to VideoSource

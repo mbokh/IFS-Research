@@ -58,7 +58,7 @@ outVideo = None
 plt.ion()
 plt.show()
 
-with open('extractedData/extractedDataSquaredLoss1.pickle', 'rb') as f:
+with open('extractedData/extractedDataRestrictedRange.pickle', 'rb') as f:
 	minWavelength, maxWavelength, particleData = pickle.load(f)
 	frameNum = 0
 
@@ -92,12 +92,12 @@ with open('extractedData/extractedDataSquaredLoss1.pickle', 'rb') as f:
 			axs[int(graphNum / COLS), graphNum % COLS].plot(xs, spectra, label=("" + str(pId)), color=color)
 
 			theoreticalCurve = conversion.plancksLaw(calibration.PIXEL_TO_WAVELENGTH, temp)
-			axs[int(graphNum / COLS), graphNum % COLS].plot(xs, theoreticalCurve, color='black')
+			axs[int(graphNum / COLS), graphNum % COLS].plot(xs, theoreticalCurve, color='black', linestyle='--', linewidth=0.7)
 
 			axs[int(graphNum / COLS), graphNum % COLS].set_title("ID: " + str(pId) + ", Temp: " + str(temp))
 			axs[int(graphNum / COLS), graphNum % COLS].set_xlabel('Wavelength (nm)')
-			axs[int(graphNum / COLS), graphNum % COLS].set_ylim(0, 4 * (10**12))
-			axs[int(graphNum / COLS), graphNum % COLS].set_xlim(4 * 1e-7, 8 * 1e-7) #Dummy bounds
+			axs[int(graphNum / COLS), graphNum % COLS].set_ylim(0, 1 * (10**12))
+			axs[int(graphNum / COLS), graphNum % COLS].set_xlim(5.5 * 1e-7, 8 * 1e-7) #Dummy bounds
 			axs[int(graphNum / COLS), graphNum % COLS].xaxis.set_major_formatter(ticks.FuncFormatter(formatter))
 
 			graphNum += 1
@@ -105,8 +105,8 @@ with open('extractedData/extractedDataSquaredLoss1.pickle', 'rb') as f:
 			axs[int(graphNum / COLS), graphNum % COLS].clear()
 			axs[int(graphNum / COLS), graphNum % COLS].set_title("")
 			axs[int(graphNum / COLS), graphNum % COLS].set_xlabel('Wavelength (nm)')
-			axs[int(graphNum / COLS), graphNum % COLS].set_ylim(0, 4 * (10 ** 12))
-			axs[int(graphNum / COLS), graphNum % COLS].set_xlim(4 * 1e-7, 8 * 1e-7)  # Dummy bounds
+			axs[int(graphNum / COLS), graphNum % COLS].set_ylim(0, 1 * (10 ** 12))
+			axs[int(graphNum / COLS), graphNum % COLS].set_xlim(5.5 * 1e-7, 8 * 1e-7)  # Dummy bounds
 			axs[int(graphNum / COLS), graphNum % COLS].xaxis.set_major_formatter(ticks.FuncFormatter(formatter))
 			graphNum += 1
 
@@ -118,7 +118,7 @@ with open('extractedData/extractedDataSquaredLoss1.pickle', 'rb') as f:
 
 		if outVideo is None:
 			s = fig.get_size_inches()*fig.dpi
-			outVideo = cv2.VideoWriter("extractedData/spectraVideoTest.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(s[0]), int(s[1])))
+			outVideo = cv2.VideoWriter("extractedData/spectraVideoRestricted.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(s[0]), int(s[1])))
 		img = np.array(fig.canvas.buffer_rgba())
 		img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
 		outVideo.write(img)
@@ -128,3 +128,4 @@ with open('extractedData/extractedDataSquaredLoss1.pickle', 'rb') as f:
 
 cv2.destroyAllWindows()
 outVideo.release()
+plt.close('all')

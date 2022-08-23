@@ -130,7 +130,7 @@ def extractRawSpectra(frame, video):
 		spectra = averageOverRanges(imageSlice, minBound, maxBound, [(particles[conflictId][0][1], particles[conflictId][0][3])], particles[conflictId][1])
 
 		resultDict = conflictResolution.resolve(spectra, offsets) #pId -> temp, spectra
-		for pId in resultDict: #Have to flip spectra since we want lower wavelengths on the left side
+		for pId in resultDict:
 			finalSpectra[pId] = (resultDict[pId][0], resultDict[pId][1], 4)
 			if conflictId in unresolvableConflicts:
 				del unresolvableConflicts[pId]
@@ -141,12 +141,12 @@ def extractRawSpectra(frame, video):
 		originalSpectra = conversion.convertPixelToPhysical(resolvableConflicts[pId][0])
 		finalSpectra[pId] = (temp[pId][0], originalSpectra, resolvableConflicts[pId][1])
 
-		plt.clf()
-		plt.plot(np.flip(originalSpectra))
+		'''plt.clf()
+		plt.plot(originalSpectra)
 		curve = conversion.plancksLaw(calibration.PIXEL_TO_WAVELENGTH, temp[pId][0])
 		#print(temp[pId][0])
 		plt.plot(curve)
-		plt.show()
+		plt.show()'''
 
 
 	#Log in database

@@ -92,8 +92,8 @@ def formatter(x, pos):
 def makeSpectraGraph(particles, frameNum, minWavelength, maxWavelength):
 	plt.clf()
 	plt.gca().set_xlabel('Wavelength (nm)')
-	plt.gca().set_ylim(0, 5 * (10**12))
-	plt.gca().set_xlim(5 * 1e-7, 7.5 * 1e-7) #Dummy bounds
+	plt.gca().set_ylim(0, 1 * (10**12))
+	plt.gca().set_xlim(5.5 * 1e-7, 8 * 1e-7) #Dummy bounds
 	plt.gca().xaxis.set_major_formatter(ticks.FuncFormatter(formatter))
 	for pId in particles:
 		p = particles[pId]
@@ -201,12 +201,12 @@ plt.ion()
 plt.show()
 
 
-outVideo = cv2.VideoWriter("extractedData/CompiledVideo.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (2000, 1200))
+outVideo = cv2.VideoWriter("extractedData/CompiledVideoRestricted.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (2000, 1200))
 
-with open('extractedData/extractedData.pickle', 'rb') as f:
+with open('extractedData/extractedDataRestrictedRange.pickle', 'rb') as f:
 	minWavelength, maxWavelength, particles = pickle.load(f)
 
-	video = VideoSource.VideoSource(filename="Al3Zr_SM_30k_Run2.avi", skip=0, end=-1, spectraStart=150, spectraEnd=1024 - 1)
+	video = VideoSource.VideoSource(filename="Al3Zr_SM_30k_Run2.avi", skip=0, end=-1, spectraStart=150, spectraEnd=1024 - 1, flipLR=False)
 
 	while True:
 		frame, frameNum = video.getFrame()
@@ -243,3 +243,4 @@ with open('extractedData/extractedData.pickle', 'rb') as f:
 video.destroy()
 cv2.destroyAllWindows()
 outVideo.release()
+plt.close('all')

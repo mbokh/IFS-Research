@@ -9,7 +9,7 @@ from backend import frameDecoration, spectraExtract, tracking
 def identityTransform(coords):
 	return coords
 
-video = VideoSource.VideoSource(filename="Al3Zr_SM_30k_Run2.avi", skip=0, end=-1, spectraStart=150, spectraEnd=1023)
+video = VideoSource.VideoSource(filename="Al3Zr_SM_30k_Run2.avi", skip=0, end=-1, spectraStart=150, spectraEnd=1023, flipLR=True)
 tracker = tracking.MultiObjectTracker()
 decorator = frameDecoration.FrameDecorator()
 

@@ -3,7 +3,7 @@ This repo contains code to process hyperspectral images/videos as produced by th
 
 This software was developed in Python 3.7, but any reasonably close version should suffice. Additionally, it has dependencies on `opencv-python`, `matplotlib`, `numpy`, `scipy`, as well as their own dependencies
 
-In order to begin the processing, put the hyperspectral video (or a folder containing the frames) in the `sources` folder. The only scripts you need to directly interact with are in the top-level directory and are all prefixed with `main`. Open the script `mainExtractData.py` and edit this line: `video = VideoSource.VideoSource(filename="ENTER FILE NAME HERE", skip=0, end=-1, spectraStart=150, spectraEnd=1023, flipLR=True)` to put in the name of the video file in the filename argument.  In addition, specify the x range over which the spectral lines appear. These values do not have to particularly exact, they are simply used to isolate certain regions of the frames to look for either spectral lines or particles. Do not edit the `flipLR=True` parameter.
+In order to begin the processing, put the hyperspectral video (or a folder containing the frames) in the `sources` folder. The only scripts you need to directly interact with are in the top-level directory and are all prefixed with `main`. Open the script `mainExtractData.py` and edit this line: `video = VideoSource.VideoSource(filename="ENTER FILE NAME HERE", skip=0, end=-1, spectraStart=150, spectraEnd=1023, flipLR=calib.FLIP_SOURCES_LR)` to put in the name of the video file in the filename argument.  In addition, specify the x range over which the spectral lines appear. These values do not have to particularly exact, they are simply used to isolate certain regions of the frames to look for either spectral lines or particles. The `flipLR` parameter itself should not be modified, it tells the code whether to flip the video horizontally to have increasing x correspond to increasing wavelength. To correctly set this, you can change the value at the top of the `backend/calib.py` file. The output bounding box data will be in reference to the (possibly) flipped video.
 
 Running this script will create a pickle file which contains all the useful information extracted from the video. Depending on how long / complex the video is, extraction could take over an hour, but it will print out its progress periodically. 
 
@@ -75,7 +75,7 @@ Then, we look at essentially the same image, but with the physical filter remove
 
 
 ### Raw Spectra Extraction
-After finding the bounding boxes of each particle in a given frame, we analyze the rest of the image to extract spectral data. 
+After finding the bounding boxes of each particle in a given frame, we analyze the rest of the image to extract spectral data. In an atttempt to filter some noise, **occluded particles will not have their spectra extracted**, and in the extracted data, the temperature will be indicated as 0, with spectral data being an array of 0s. 
 
 In the simplest case, a spectral line is not overlapped by any other line, and we can simply "read it off". We apply the translation to the original particle's coordinates, and then, starting from a known distance to the left of the mapping, scan to a known distance to the right of the centroid. The height over which we scan is the same height as the original particle's bounding box. We then average over height and width of the particle's bounding box. It seems to be that spectral lines are vaguely diamond in shape, in that they taper towards the ends. Since our averaging region is rectangular, this means that, towards the ends, more background color will be averaged into the spectra. However, this was also the case for the calibration process, and so it is divided away in the calibration. 
 
@@ -100,6 +100,7 @@ After the extraction is done, we record the particles temperature, converted spe
 * 2: No conflicts after subtracting out previously known spectra
 * 3: Partial conflict(s), but able to find isolated strip after subtracting out previously known spectra
 * 4: Used optimization on temperature parameters (see below)
+* 5: Occluded particle, temperature and spectra are zero
 
 ### Conflict Resolution and Temperature Extraction
 

@@ -45,7 +45,7 @@ def addSpectraData(spectraDict):
 	for pId in spectraDict:
 		getParticleById(pId).addSpectraData(spectraDict[pId])
 
-def getFullDataForPickling(videoWidth):
+def getFullDataForPickling():
 	for pId in particles:
-		particles[pId].prepareForPickling(videoWidth)
+		particles[pId].prepareForPickling()
 	return particles

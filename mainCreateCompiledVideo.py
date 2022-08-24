@@ -2,7 +2,7 @@ import cv2
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticks
-from backend import colorID
+from backend import colorID, calib
 
 import sources.VideoSource as VideoSource
 import pickle
@@ -190,7 +190,7 @@ def colorRegionWithTemperature(img, T, bBox):
 	img[bBox[1]:bBox[1] + bBox[3] + 1, bBox[0]:bBox[0] + bBox[2] + 1] = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
 def coordTransform(coords):
-	return (coords[0]) * 4, (coords[1] - 220) * 4, coords[2] * 4, coords[3] * 4, (coords[4]) * 4, (coords[5] - 220) * 4
+	return (coords[0] - 720) * 4, (coords[1] - 220) * 4, coords[2] * 4, coords[3] * 4, (coords[4] - 720) * 4, (coords[5] - 220) * 4
 
 
 matplotlib.use('TkAgg')
@@ -201,12 +201,12 @@ plt.ion()
 plt.show()
 
 
-outVideo = cv2.VideoWriter("extractedData/CompiledVideoRestricted.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (2000, 1200))
+outVideo = cv2.VideoWriter("extractedData/CompiledVideo.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (2000, 1200))
 
-with open('extractedData/extractedDataRestrictedRange.pickle', 'rb') as f:
+with open('extractedData/extractedData.pickle', 'rb') as f:
 	minWavelength, maxWavelength, particles = pickle.load(f)
 
-	video = VideoSource.VideoSource(filename="Al3Zr_SM_30k_Run2.avi", skip=0, end=-1, spectraStart=150, spectraEnd=1024 - 1, flipLR=False)
+	video = VideoSource.VideoSource(filename="Al3Zr_SM_30k_Run2.avi", skip=0, end=-1, spectraStart=150, spectraEnd=1024 - 1, flipLR=calib.FLIP_SOURCES_LR)
 
 	while True:
 		frame, frameNum = video.getFrame()
@@ -214,27 +214,29 @@ with open('extractedData/extractedDataRestrictedRange.pickle', 'rb') as f:
 			print("Video Done")
 			break
 
-		resized = cv2.resize(frame[220:520, 0:500], (2000, 1200)) #X, Y
-		resized = decorateFrame(particles, resized, frameNum, showDebugInfo=True, showPath=False, fullBoundingBox=False)
+		outFrame = np.zeros((1200, 2000, 3), dtype=np.uint8)
+		outFrame[:1200, :1200] = cv2.resize(frame[220:520, 720:1020], (1200, 1200))  # X, Y
+		#resized = cv2.resize(frame[220:520, 0:500], (2000, 1200)) #X, Y
+		resized = decorateFrame(particles, outFrame, frameNum, showDebugInfo=True, showPath=False, fullBoundingBox=False)
 
 		makeTempGraph(particles, frameNum)
 
 		img = np.array(graph.canvas.buffer_rgba())
 		img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
 
-		resized[:img.shape[0], -img.shape[1]:] = img
+		outFrame[:img.shape[0], -img.shape[1]:] = img
 
 		makeSpectraGraph(particles, frameNum, minWavelength, maxWavelength)
 
 		img = np.array(graph.canvas.buffer_rgba())
 		img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
 
-		resized[-img.shape[0]:, -img.shape[1]:] = img
+		outFrame[-img.shape[0]:, -img.shape[1]:] = img
 
 
 		if frameNum % 50 == 0:
 			print(frameNum)
-		outVideo.write(resized)
+		outVideo.write(outFrame)
 
 		#cv2.imshow('Data', resized)
 		#if cv2.waitKey(0) & 0xFF == ord('q'):

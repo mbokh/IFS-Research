@@ -2,11 +2,11 @@ import pickle
 import csv
 
 
-outFile = open('extractedData/dataRestrictedRange.csv', 'w')
+outFile = open('extractedData/data.csv', 'w')
 writer = csv.writer(outFile, lineterminator = '\n')
 #writer.writerow(["// Format: pId, frame #, [temperature, [spectra], spectra code], (bounding box), brightness, occlusion count"])
 
-with open('extractedData/extractedDataRestrictedRange.pickle', 'rb') as f:
+with open('extractedData/extractedData.pickle', 'rb') as f:
 	minWavelength, maxWavelength, particles = pickle.load(f)
 
 	writer.writerow([minWavelength, maxWavelength])

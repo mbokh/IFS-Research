@@ -58,7 +58,7 @@ outVideo = None
 plt.ion()
 plt.show()
 
-with open('extractedData/extractedDataRestrictedRange.pickle', 'rb') as f:
+with open('extractedData/extractedData.pickle', 'rb') as f:
 	minWavelength, maxWavelength, particleData = pickle.load(f)
 	frameNum = 0
 
@@ -118,10 +118,13 @@ with open('extractedData/extractedDataRestrictedRange.pickle', 'rb') as f:
 
 		if outVideo is None:
 			s = fig.get_size_inches()*fig.dpi
-			outVideo = cv2.VideoWriter("extractedData/spectraVideoRestricted.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(s[0]), int(s[1])))
+			outVideo = cv2.VideoWriter("extractedData/spectraVideo.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(s[0]), int(s[1])))
 		img = np.array(fig.canvas.buffer_rgba())
 		img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
 		outVideo.write(img)
+
+		if frameNum % 50 == 0:
+			print(frameNum)
 
 		plt.pause(0.01)
 		frameNum += 1

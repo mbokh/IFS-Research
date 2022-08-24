@@ -42,8 +42,5 @@ class Particle:
 		self.spectraData.append((data[0], data[1].astype(np.uint64).tolist(), data[2]))  #Want spectra as simple python list so that it can be pickled
 		assert(len(self.spectraData) == len(self.particleData)) #Also values are ~10^11+, round to int to save space in pickle and csv file
 
-	def prepareForPickling(self, videoWidth):
+	def prepareForPickling(self):
 		self.kalmanFilter = None #Can't pickle kalman, and we don't need it anyway, so simply destroy it
-		for d in self.particleData:
-			d[0][0] = (videoWidth - 1) - (d[0][0] + d[0][2] - 1) #Watch flip ordering
-			d[0][4] = (videoWidth - 1) - (d[0][4])

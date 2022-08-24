@@ -7,8 +7,8 @@ import time
 
 startTime = time.time_ns()
 
-video = VideoSource.VideoSource(filename="Al3Zr_SM_30k_Run2.avi", skip=0, end=-1, spectraStart=150, spectraEnd=1023, flipLR=True)
-#video = FramesSource.FramesSource(prefix="Al3Zr_SM_30k_30k_sh_g15_5mm_toff_0ms_Run5", skip=0, end=-1, spectraStart=150, spectraEnd=1023, flipLR=True)
+video = VideoSource.VideoSource(filename="Al3Zr_SM_30k_Run2.avi", skip=0, end=-1, spectraStart=150, spectraEnd=1023, flipLR=calib.FLIP_SOURCES_LR)
+#video = FramesSource.FramesSource(prefix="Al3Zr_SM_30k_30k_sh_g15_5mm_toff_0ms_Run5", skip=0, end=-1, spectraStart=150, spectraEnd=1023, flipLR=calib.FLIP_SOURCES_LR)
 tracker = tracking.MultiObjectTracker()
 
 while True:
@@ -20,12 +20,12 @@ while True:
 		print(frameNum)
 
 	tracker.processImage(frame, frameNum, video)
-	f = spectraExtract.extractRawSpectra(frame, video)
+	f, dummy = spectraExtract.extractRawSpectra(frame, video)
 
 video.destroy()
 
 print("Extraction took "  + str((time.time_ns() - startTime) / 1000000000) + " seconds")
 
-data = (calib.MIN_WAVELENGTH, calib.MAX_WAVELENGTH, database.getFullDataForPickling(video.getWidth()))
-with open('extractedData/extractedDataRestrictedRange.pickle', 'wb') as pickleFile:
+data = (calib.MIN_WAVELENGTH, calib.MAX_WAVELENGTH, database.getFullDataForPickling())
+with open('extractedData/extractedData.pickle', 'wb') as pickleFile:
 	pickle.dump(data, pickleFile)

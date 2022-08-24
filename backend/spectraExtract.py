@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import math
+import copy
 import matplotlib.pyplot as plt
 
 from backend import calib as calibration, colorID, conflictResolution as conflictResolution, conversion as conversion, database
@@ -69,8 +70,12 @@ def extractRawSpectra(frame, video):
 	cv2.line(padded, (origWidth - 1, padding), (origWidth - 1, origHeight - 1 + padding), (255, 255, 255), 1)
 	debugImage = cv2.warpAffine(src=padded, M=rotate_matrix, dsize=(width, height))
 
+	finalSpectra = dict()  # pId -> temp, spectra, code
 	particles = dict() #Contain pId -> ((left, top, right, bottom), particleWidth)
 	for particleId, box, occlusionCount in database.getLastBoundingBoxes():
+		if occlusionCount > 0:
+			finalSpectra[particleId] = (0, np.zeros(calibration.SYSTEM_RESPONSE.size), 5)
+			continue
 		x1, y1, w1, h1, cX1, cY1 = box
 		mappedCX, mappedCY = mapParticleToSpectra(cX1, cY1)
 		#Length preserved
@@ -92,7 +97,7 @@ def extractRawSpectra(frame, video):
 		if code == 0 or code == 1:
 			resolvableConflicts[i] = (averageOverRanges(gray, particles[i][0][0], particles[i][0][2], data, particles[i][1]), code)
 		else:
-			unresolvableConflicts[i] = (data, gray.copy()) # A little expensive to copy, but worth the trouble
+			unresolvableConflicts[i] = (data, copy.deepcopy(gray).astype(np.int16)) # A little expensive to copy, but worth the trouble, make sure allow for negative values to prevent overflow
 
 
 	#Try to subtract away known spectra
@@ -103,7 +108,7 @@ def extractRawSpectra(frame, video):
 			for c in list(conflicts): #Remove conflicts when spectra are known
 				if c in resolvableConflicts:
 					xRange, yRange, spectraSegment = getSubtractionBounds(particles[conflictId][0], particles[c][0], resolvableConflicts[c][0]) #Subtraction is broadcasted to each row
-					imageSlice[yRange[0]:(yRange[1] + 1), xRange[0]:(xRange[1] + 1)] = imageSlice[yRange[0]:(yRange[1] + 1), xRange[0]:(xRange[1] + 1)] - spectraSegment #Can't use -= with numpy slice
+					imageSlice[yRange[0]:(yRange[1] + 1), xRange[0]:(xRange[1] + 1)] = np.clip(imageSlice[yRange[0]:(yRange[1] + 1), xRange[0]:(xRange[1] + 1)] - spectraSegment, a_min=0, a_max=None)  #Can't use -= with numpy slice
 					conflicts.remove(c)
 			data, code = getConflictType(conflictId, particles, conflicts)
 			if code == 0 or code == 1:
@@ -114,7 +119,7 @@ def extractRawSpectra(frame, video):
 			break
 		oldLength = len(unresolvableConflicts)
 
-	finalSpectra = dict() #pId -> temp, spectra, code
+
 	#Now, have to do least-squares or brute for demixing
 	while len(unresolvableConflicts) > 0:
 		conflictId = list(unresolvableConflicts.keys())[0]
@@ -134,6 +139,9 @@ def extractRawSpectra(frame, video):
 			finalSpectra[pId] = (resultDict[pId][0], resultDict[pId][1], 4)
 			if conflictId in unresolvableConflicts:
 				del unresolvableConflicts[pId]
+		#finalSpectra[conflictId] = (resultDict[conflictId][0], resultDict[conflictId][1], 4)
+		#del unresolvableConflicts[conflictId]
+
 
 	#Add from data from resolvable conflicts
 	for pId in resolvableConflicts:
@@ -151,7 +159,7 @@ def extractRawSpectra(frame, video):
 
 	#Log in database
 	database.addSpectraData(finalSpectra)
-	return debugImage
+	return debugImage, finalSpectra
 
 
 def getSubtractionBounds(baseBox, conflictBox, conflictSpectra): #Particle positions

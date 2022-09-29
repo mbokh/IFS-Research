@@ -91,7 +91,7 @@ with open('extractedData/extractedData.pickle', 'rb') as f:
 			xs = np.linspace(minWavelength, maxWavelength, len(spectra))
 			axs[int(graphNum / COLS), graphNum % COLS].plot(xs, spectra, label=("" + str(pId)), color=color)
 
-			theoreticalCurve = conversion.plancksLaw(calibration.PIXEL_TO_WAVELENGTH, temp)
+			theoreticalCurve = np.zeros(len(calibration.PIXEL_TO_WAVELENGTH)) if temp == 0 else conversion.plancksLaw(calibration.PIXEL_TO_WAVELENGTH, temp)
 			axs[int(graphNum / COLS), graphNum % COLS].plot(xs, theoreticalCurve, color='black', linestyle='--', linewidth=0.7)
 
 			axs[int(graphNum / COLS), graphNum % COLS].set_title("ID: " + str(pId) + ", Temp: " + str(temp))
@@ -118,7 +118,7 @@ with open('extractedData/extractedData.pickle', 'rb') as f:
 
 		if outVideo is None:
 			s = fig.get_size_inches()*fig.dpi
-			outVideo = cv2.VideoWriter("extractedData/spectraVideo.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(s[0]), int(s[1])))
+			outVideo = cv2.VideoWriter("extractedData/spectraVideoTest.mp4", cv2.VideoWriter_fourcc(*'DIVX'), 10, (int(s[0]), int(s[1])))
 		img = np.array(fig.canvas.buffer_rgba())
 		img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
 		outVideo.write(img)
